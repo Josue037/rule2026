@@ -1,1 +1,765 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sorteo UC 2026 - Conferencia de usuarios Geotecnologías</title>
+  <style>
+    :root {
+      --bg-dark: rgba(10, 14, 24, 0.75);
+      --panel: rgba(255, 255, 255, 0.08);
+      --panel-strong: rgba(255, 255, 255, 0.12);
+      --gold: #ffd54f;
+      --gold-strong: #ffb300;
+      --green: #00ffc3;
+      --text: #ffffff;
+      --shadow: rgba(0, 0, 0, 0.55);
+    }
 
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: var(--text);
+      background: #0b1020;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    #videoFondo {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+      filter: brightness(0.75) saturate(1.0);
+      pointer-events: none;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.12);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    body > *:not(#videoFondo) {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Header that contains logo + title, centered like el contenedor */
+    #header {
+      width: min(1400px, calc(100% - 30px));
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-top: 12px;
+      padding: 6px 0;
+    }
+
+    /* Logo is inline with the title now (no fixed positioning) */
+    #logoUC {
+      width: 140px;
+      height: auto;
+      opacity: 1;
+      filter: drop-shadow(0 0 10px rgba(0,0,0,0.7));
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      flex: 0 0 auto;
+    }
+    #logoUC:hover { opacity: 0.95; transform: translateY(-2px); }
+
+    h2 {
+      margin: 0;
+      text-align: left;
+      text-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
+      font-size: clamp(1.6rem, 2vw, 2.4rem);
+      line-height: 1.05;
+      font-weight: 700;
+    }
+
+    #selectorGrupo {
+      margin-top: 8px;
+      text-align: center;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    #tituloRuleta {
+      margin: 16px 0 10px;
+      text-align: center;
+      font-size: 1.4rem;
+      color: #ffe26f;
+      text-shadow: 0 0 8px rgba(0,0,0,0.6);
+    }
+
+    #contenedor {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+      width: min(1400px, calc(100% - 30px));
+      gap: 20px;
+      margin-top: 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 0 28px rgba(0,0,0,0.55);
+    }
+
+    #participantes, #ganadoresContainer {
+      flex: 1 1 220px;
+      min-width: 220px;
+      max-height: 80vh;
+      overflow-y: auto;
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: inset 0 0 8px rgba(255,255,255,0.12);
+    }
+
+    #participantes h3, #ganadoresContainer h3 {
+      margin-top: 0;
+      color: #ffe26f;
+      text-align: center;
+      text-shadow: 0 0 6px rgba(0,0,0,0.5);
+      font-size: 1.1rem;
+    }
+
+    .nombre {
+      padding: 7px 10px;
+      margin: 4px 0;
+      border-radius: 8px;
+      transition: background 0.25s ease, transform 0.2s ease, color 0.2s ease;
+      word-break: break-word;
+    }
+
+    .nombre:hover {
+      transform: scale(1.02);
+      background: rgba(255,255,255,0.06);
+    }
+
+    .activo {
+      background: rgba(255,255,255,0.18);
+      font-weight: bold;
+      color: var(--green);
+      box-shadow: inset 0 0 0 1px rgba(0,255,195,0.2);
+    }
+
+    #ruletaContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: min(560px, 100%);
+      flex: 1.4 1 520px;
+    }
+
+    canvas {
+      display: block;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      box-shadow: 0 0 34px rgba(0,0,0,0.6);
+      max-width: min(60vw, 620px);
+      width: 100%;
+      height: auto;
+      border: 3px solid rgba(255,255,255,0.08);
+    }
+
+    #puntero {
+      width: 0;
+      height: 0;
+      border-left: 24px solid transparent;
+      border-right: 24px solid transparent;
+      border-bottom: 38px solid #ff2d2d;
+      margin: 0 auto 10px;
+      transform: rotate(180deg);
+      filter: drop-shadow(0 0 8px rgba(255,255,255,0.5));
+    }
+
+    #botones {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 12px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button {
+      padding: 10px 18px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, var(--gold), var(--gold-strong));
+      color: #000;
+      font-weight: 700;
+      transition: 0.25s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #ffe082, #ffc107);
+      transform: translateY(-1px) scale(1.03);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #estado {
+      margin-top: 10px;
+      min-height: 22px;
+      font-size: 0.96rem;
+      text-align: center;
+      color: #dfe8ff;
+      opacity: 0.9;
+    }
+
+    #ganador { display: none; }
+
+    #overlayGanador {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      font-size: clamp(1.8rem, 3vw, 3rem);
+      font-weight: bold;
+      color: var(--green);
+      text-shadow: 0 0 18px rgba(0,255,195,0.9);
+      background: rgba(0,0,0,0.82);
+      padding: 28px 42px 18px;
+      border-radius: 20px;
+      z-index: 9999;
+      text-align: center;
+      transition: transform 0.45s ease, opacity 0.45s ease;
+      opacity: 0;
+      pointer-events: none;
+      box-shadow: 0 0 30px rgba(0,255,195,0.2);
+      border: 1px solid rgba(0,255,195,0.25);
+      max-width: 90vw;
+    }
+
+    #overlayGanador.visible {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+      pointer-events: auto;
+    }
+
+    #cerrarOverlay {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      background: transparent;
+      color: #d7b5ff;
+      font-weight: bold;
+      font-size: 22px;
+      border: none;
+      border-radius: 50%;
+      width: 34px;
+      height: 34px;
+      cursor: pointer;
+      box-shadow: none;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .logos {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 30px 0 20px;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+
+    .logos img {
+      height: 60px;
+      transition: transform 0.3s ease;
+      filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+    }
+
+    .logos img:hover {
+      transform: scale(1.1);
+    }
+
+    @media (max-width: 850px) {
+      #contenedor {
+        flex-direction: column;
+      }
+
+      canvas {
+        max-width: 72vw;
+      }
+
+      #header {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+
+      #logoUC {
+        width: 110px;
+      }
+
+      h2 {
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 520px) {
+      #selectorGrupo {
+        width: 100%;
+      }
+
+      button {
+        width: 100%;
+      }
+
+      #botones {
+        width: 100%;
+      }
+
+      #botones button {
+        flex: 1 1 180px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <video id="videoFondo" autoplay loop muted playsinline>
+    <source src="https://nube.geotecnologias.co.cr/s/rnKAsWrQ2ieF2cq/download" type="video/mp4">
+  </video>
+
+  <!-- Header: logo inline with title (logo no longer fixed/overlapping) -->
+  <div id="header">
+    <img id="logoUC" src="https://raw.githubusercontent.com/Josue037/rule2026/main/image26.png" alt="UC Logo" />
+    <h2>Sorteo UC 2026 - Conferencia de usuarios Geotecnologías - ESRI</h2>
+  </div>
+
+  <div id="selectorGrupo">
+    <button onclick="cambiarGrupo(0)">Premio 1</button>
+    <button onclick="cambiarGrupo(1)">Premio 2</button>
+    <button onclick="cambiarGrupo(2)">Premio 3</button>
+  </div>
+
+  <h3 id="tituloRuleta">Ruleta 1</h3>
+
+  <div id="contenedor">
+    <div id="participantes">
+      <h3>Participantes</h3>
+      <div id="listaParticipantes"></div>
+    </div>
+
+    <div id="ruletaContainer">
+      <div id="puntero"></div>
+      <canvas id="ruleta" width="400" height="400"></canvas>
+
+      <div id="botones">
+        <button id="btnGirar" onclick="girar()">🎲 Girar</button>
+        <button onclick="actualizarLista()">🔄 Actualizar lista</button>
+        <button onclick="reiniciarSorteo()">↺ Reiniciar</button>
+      </div>
+
+      <div id="estado">Cargando participantes...</div>
+      <div id="ganador"></div>
+    </div>
+
+    <div id="ganadoresContainer">
+      <h3>Ganadores</h3>
+      <div id="listaGanadores"></div>
+    </div>
+  </div>
+
+  <div id="overlayGanador">
+    <button id="cerrarOverlay" onclick="cerrarOverlay()">✖️</button>
+    <div id="textoGanador"></div>
+  </div>
+
+  <div class="logos">
+    <img src="https://raw.githubusercontent.com/Josue037/rule2026/main/logoe.png" alt="Logo E" />
+    <img src="https://raw.githubusercontent.com/Josue037/rule2026/main/logog.png" alt="Logo G" />
+  </div>
+
+  <script>
+    const url = "https://services1.arcgis.com/7ToOpQ2UUjs5M3iQ/arcgis/rest/services/Asistentes_UC_GT_-_Rifa/FeatureServer/0/query?where=cliente_registrado%3D1&outFields=nombre%2Capellido&returnGeometry=false&f=json";
+
+    let nombresOriginales = [];
+    let grupos = [];
+    let grupoActual = 0;
+    let ganadores = [];
+    let girando = false;
+    let startAngle = -Math.PI / 2;
+    let animFrame = null;
+    let ganadorTemporal = null;
+
+    const canvas = document.getElementById("ruleta");
+    const ctx = canvas.getContext("2d");
+    const btnGirar = document.getElementById("btnGirar");
+    const estadoEl = document.getElementById("estado");
+
+    const colores = [
+      "#007bff", "#00bcd4", "#4caf50", "#ffeb3b", "#ff9800", "#e91e63",
+      "#9c27b0", "#3f51b5", "#2196f3", "#009688", "#ff5722", "#cddc39",
+      "#673ab7", "#8bc34a", "#f44336", "#03a9f4", "#795548", "#ffc107",
+      "#00acc1", "#ff6f00"
+    ];
+
+    function ajustarCanvas() {
+      const tam = Math.min(window.innerWidth * 0.6, 620);
+      canvas.width = tam;
+      canvas.height = tam;
+      dibujarRuleta();
+    }
+
+    window.addEventListener("resize", ajustarCanvas);
+
+    function normalizarNombre(nombre) {
+      return String(nombre || "").replace(/\s+/g, " ").trim();
+    }
+
+    function limpiarNombres(lista) {
+      const nombres = lista
+        .map(n => normalizarNombre(n))
+        .filter(Boolean);
+
+      const vistos = new Set();
+      return nombres.filter(nombre => {
+        if (vistos.has(nombre.toLowerCase())) return false;
+        vistos.add(nombre.toLowerCase());
+        return true;
+      });
+    }
+
+    function mostrarEstado(mensaje, tipo = "info") {
+      estadoEl.textContent = mensaje;
+      estadoEl.style.color = tipo === "error" ? "#ff9ea3" : tipo === "success" ? "#8bf5c8" : "#dfe8ff";
+    }
+
+    async function cargarDatos() {
+      mostrarEstado("Cargando participantes...", "info");
+      btnGirar.disabled = true;
+
+      try {
+        const res = await fetch(url);
+
+        if (!res.ok) {
+          throw new Error(`No se pudo cargar la lista (${res.status})`);
+        }
+
+        const data = await res.json();
+
+        if (!data || !Array.isArray(data.features)) {
+          throw new Error("La respuesta del servicio no tiene datos válidos.");
+        }
+
+        const nombres = limpiarNombres(
+          data.features.map(f => {
+            const nombre = f?.attributes?.nombre;
+            const apellido = f?.attributes?.apellido;
+            return `${nombre || ""} ${apellido || ""}`.trim();
+          })
+        );
+
+        if (!nombres.length) {
+          throw new Error("No hay participantes disponibles.");
+        }
+
+        nombresOriginales = nombres;
+        const tamanoGrupo = Math.ceil(nombres.length / 3);
+
+        grupos = [];
+        for (let i = 0; i < nombres.length; i += tamanoGrupo) {
+          grupos.push(nombres.slice(i, i + tamanoGrupo));
+        }
+
+        ganadores = [];
+        renderListaGanadores();
+        cambiarGrupo(0);
+        mostrarEstado("Participantes cargados correctamente.", "success");
+        btnGirar.disabled = false;
+      } catch (error) {
+        console.error(error);
+        nombresOriginales = [];
+        grupos = [];
+        ganadores = [];
+        renderListaGanadores();
+        document.getElementById("tituloRuleta").textContent = "Ruleta 1";
+        actualizarListaParticipantes([]);
+        dibujarRuleta();
+        mostrarEstado(error.message || "Error al cargar datos.", "error");
+      }
+    }
+
+    function getParticipantesActivos() {
+      const nombresGrupo = grupos[grupoActual] || [];
+      return nombresGrupo.filter(n => !ganadores.includes(n));
+    }
+
+    function cambiarGrupo(indice) {
+      if (!grupos[indice]) return;
+      grupoActual = indice;
+      document.getElementById("tituloRuleta").textContent = `Ruleta ${grupoActual + 1}`;
+      actualizarListaParticipantes();
+      dibujarRuleta();
+    }
+
+    function actualizarListaParticipantes(lista = getParticipantesActivos()) {
+      const cont = document.getElementById("listaParticipantes");
+      cont.innerHTML = "";
+
+      if (!lista.length) {
+        const vacio = document.createElement("div");
+        vacio.textContent = "No hay participantes activos.";
+        vacio.className = "nombre";
+        cont.appendChild(vacio);
+        return;
+      }
+
+      lista.slice(0, 10).forEach(nombre => {
+        const div = document.createElement("div");
+        div.textContent = nombre;
+        div.className = "nombre";
+        cont.appendChild(div);
+      });
+    }
+
+    function marcarActivo(nombre) {
+      const cont = document.getElementById("listaParticipantes");
+      const participantes = getParticipantesActivos();
+      cont.innerHTML = "";
+
+      if (!participantes.length) {
+        actualizarListaParticipantes([]);
+        return;
+      }
+
+      const indexActivo = participantes.indexOf(nombre);
+      const inicio = Math.max(0, indexActivo - 4);
+      const fin = Math.min(participantes.length, inicio + 10);
+
+      for (let i = inicio; i < fin; i++) {
+        const div = document.createElement("div");
+        div.textContent = participantes[i];
+        div.className = "nombre";
+        if (participantes[i] === nombre) div.classList.add("activo");
+        cont.appendChild(div);
+      }
+    }
+
+    function dibujarRuleta() {
+      const participantes = getParticipantesActivos();
+      const width = canvas.width;
+      const height = canvas.height;
+      const radio = width / 2;
+
+      ctx.clearRect(0, 0, width, height);
+
+      if (!participantes.length) {
+        ctx.fillStyle = "rgba(255,255,255,0.05)";
+        ctx.beginPath();
+        ctx.arc(radio, radio, radio, 0, Math.PI * 2);
+        ctx.fill();
+        return;
+      }
+
+      const num = participantes.length;
+      const arc = (Math.PI * 2) / num;
+
+      for (let i = 0; i < num; i++) {
+        const angle = startAngle + i * arc;
+
+        ctx.beginPath();
+        ctx.moveTo(radio, radio);
+        ctx.fillStyle = colores[i % colores.length];
+        ctx.arc(radio, radio, radio, angle, angle + arc);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(radio, radio);
+        ctx.rotate(angle + arc / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#ffffff";
+        ctx.font = `${Math.max(10, radio / (num > 30 ? 25 : 15))}px Arial`;
+
+        let texto = num > 40
+          ? participantes[i].split(" ").map(part => part[0]).join("")
+          : participantes[i];
+
+        ctx.fillText(texto, radio - 18, 10);
+        ctx.restore();
+      }
+    }
+
+    function girar() {
+      const participantes = getParticipantesActivos();
+
+      if (girando || !participantes.length) {
+        return;
+      }
+
+      girando = true;
+      btnGirar.disabled = true;
+
+      const vueltas = 5 + Math.random() * 2;
+      const spinTimeTotal = 8000 + Math.random() * 4000;
+      const startAngleInicial = startAngle;
+      const anguloFinal = startAngle + vueltas * 2 * Math.PI + Math.random() * 2 * Math.PI;
+
+      function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+      }
+
+      function rotar() {
+        const currentTime = performance.now();
+        const progress = Math.min((currentTime - spinStart) / spinTimeTotal, 1);
+        const eased = easeOutCubic(progress);
+
+        startAngle = startAngleInicial + (anguloFinal - startAngleInicial) * eased;
+        startAngle %= Math.PI * 2;
+        dibujarRuleta();
+
+        const num = participantes.length;
+        const arc = (Math.PI * 2) / num;
+        const angulo = (startAngle + Math.PI / 2) % (Math.PI * 2);
+        const index = Math.floor((Math.PI * 2 - angulo) / arc) % num;
+
+        marcarActivo(participantes[index]);
+
+        if (progress < 1) {
+          animFrame = requestAnimationFrame(rotar);
+        } else {
+          detener();
+          girando = false;
+          btnGirar.disabled = false;
+        }
+      }
+
+      const spinStart = performance.now();
+      rotar();
+    }
+
+    function mostrarGanadorOverlay(nombre) {
+      const overlay = document.getElementById("overlayGanador");
+      const texto = document.getElementById("textoGanador");
+      texto.textContent = `🎉 Ganador: ${nombre}`;
+      overlay.classList.add("visible");
+    }
+
+    function cerrarOverlay() {
+      const overlay = document.getElementById("overlayGanador");
+      overlay.classList.remove("visible");
+
+      if (ganadorTemporal) {
+        const listaG = document.getElementById("listaGanadores");
+
+        const item = document.createElement("div");
+        item.textContent = ganadorTemporal;
+        item.className = "nombre activo";
+        listaG.prepend(item);
+
+        const index = getParticipantesActivos().indexOf(ganadorTemporal);
+        if (index > -1) {
+          const participantes = getParticipantesActivos();
+          participantes.splice(index, 1);
+        }
+
+        const grupo = grupos[grupoActual] || [];
+        const idxGrupo = grupo.indexOf(ganadorTemporal);
+        if (idxGrupo > -1) {
+          grupo.splice(idxGrupo, 1);
+        }
+
+        ganadores.push(ganadorTemporal);
+        ganadorTemporal = null;
+
+        actualizarListaParticipantes();
+        dibujarRuleta();
+
+        if (!getParticipantesActivos().length) {
+          mostrarEstado("Este grupo ya no tiene participantes.", "info");
+        }
+      }
+    }
+
+    function detener() {
+      cancelAnimationFrame(animFrame);
+      const participantes = getParticipantesActivos();
+
+      if (!participantes.length) return;
+
+      const num = participantes.length;
+      const arc = (Math.PI * 2) / num;
+      const angulo = (startAngle + Math.PI / 2) % (Math.PI * 2);
+      const index = Math.floor((Math.PI * 2 - angulo) / arc) % num;
+
+      const ganador = participantes[index];
+      ganadorTemporal = ganador;
+      mostrarGanadorOverlay(ganador);
+      mostrarEstado(`Ganador seleccionado: ${ganador}`, "success");
+    }
+
+    function renderListaGanadores() {
+      const listaG = document.getElementById("listaGanadores");
+      listaG.innerHTML = "";
+
+      if (!ganadores.length) {
+        const vacio = document.createElement("div");
+        vacio.textContent = "Aún no hay ganadores.";
+        vacio.className = "nombre";
+        listaG.appendChild(vacio);
+        return;
+      }
+
+      ganadores.forEach(nombre => {
+        const item = document.createElement("div");
+        item.textContent = nombre;
+        item.className = "nombre activo";
+        listaG.appendChild(item);
+      });
+    }
+
+    function reiniciarSorteo() {
+      if (!grupos.length) return;
+
+      const grupo = grupos[grupoActual] || [];
+      const participantesRestantes = [...grupo];
+
+      ganadores = [];
+      renderListaGanadores();
+      grupos[grupoActual] = participantesRestantes;
+
+      ganadorTemporal = null;
+      actualizarListaParticipantes();
+      dibujarRuleta();
+      mostrarEstado("Sorteo reiniciado para este grupo.", "info");
+    }
+
+    function actualizarLista() {
+      cargarDatos();
+    }
+
+    cargarDatos();
+    ajustarCanvas();
+  </script>
+</body>
+</html>
