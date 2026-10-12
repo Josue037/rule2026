@@ -36,50 +36,47 @@
       position: relative;
     }
 
-    
-#videoFondo {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 0;
-  filter: brightness(0.75) saturate(1.0);
-  pointer-events: none;
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.12);
-  z-index: 1;
-  pointer-events: none;
-}
-
-body > *:not(#videoFondo) {
-  position: relative;
-  z-index: 2;
-}
-
-
-
-    #logoUC {
-  position: fixed;
-  top: 15px;
-  left: 15px;
-  width: 140px;
-  height: auto;
-  opacity: 0.5;
-  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.7));
-  z-index: 10;
-  transition: opacity 0.3s ease;
-  transform: none;
-}
-
+    #videoFondo {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+      filter: brightness(0.75) saturate(1.0);
+      pointer-events: none;
     }
 
-    #logoUC:hover { opacity: 0.85; }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.12);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    body > *:not(#videoFondo) {
+      position: relative;
+      z-index: 2;
+    }
+
+    #logoUC {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      width: 140px;
+      height: auto;
+      opacity: 1;
+      filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.7));
+      z-index: 9999;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    #logoUC:hover {
+      opacity: 0.95;
+      transform: translateY(-2px);
+    }
 
     h2 {
       margin: 28px 20px 10px;
@@ -110,13 +107,13 @@ body > *:not(#videoFondo) {
       flex-wrap: wrap;
       justify-content: center;
       align-items: flex-start;
-      width: min(1300px, calc(100% - 30px));
+      width: min(1400px, calc(100% - 30px));
       gap: 20px;
       margin-top: 12px;
       background: rgba(0, 0, 0, 0.3);
       border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 0 24px rgba(0,0,0,0.5);
+      padding: 28px;
+      box-shadow: 0 0 28px rgba(0,0,0,0.55);
     }
 
     #participantes, #ganadoresContainer {
@@ -164,19 +161,19 @@ body > *:not(#videoFondo) {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-width: min(440px, 100%);
-      flex: 1.2 1 420px;
+      min-width: min(560px, 100%);
+      flex: 1.4 1 520px;
     }
 
     canvas {
       display: block;
       border-radius: 50%;
       background: rgba(255,255,255,0.08);
-      box-shadow: 0 0 28px rgba(0,0,0,0.6);
-      max-width: min(47vw, 460px);
+      box-shadow: 0 0 34px rgba(0,0,0,0.6);
+      max-width: min(60vw, 620px);
       width: 100%;
       height: auto;
-      border: 2px solid rgba(255,255,255,0.08);
+      border: 3px solid rgba(255,255,255,0.08);
     }
 
     #puntero {
@@ -334,8 +331,8 @@ body > *:not(#videoFondo) {
 </head>
 <body>
   <video id="videoFondo" autoplay loop muted playsinline>
-  <source src="https://nube.geotecnologias.co.cr/s/rnKAsWrQ2ieF2cq/download" type="video/mp4">
-</video>
+    <source src="https://nube.geotecnologias.co.cr/s/rnKAsWrQ2ieF2cq/download" type="video/mp4">
+  </video>
 
   <img id="logoUC" src="https://raw.githubusercontent.com/Josue037/rule2026/main/image26.png" alt="UC Logo" />
 
@@ -410,7 +407,7 @@ body > *:not(#videoFondo) {
     ];
 
     function ajustarCanvas() {
-      const tam = Math.min(window.innerWidth * 0.46, 500);
+      const tam = Math.min(window.innerWidth * 0.6, 620);
       canvas.width = tam;
       canvas.height = tam;
       dibujarRuleta();
@@ -477,7 +474,6 @@ body > *:not(#videoFondo) {
           grupos.push(nombres.slice(i, i + tamanoGrupo));
         }
 
-        // resetea ganadores
         ganadores = [];
         renderListaGanadores();
         cambiarGrupo(0);
@@ -669,7 +665,6 @@ body > *:not(#videoFondo) {
           participantes.splice(index, 1);
         }
 
-        // Eliminar del grupo actual
         const grupo = grupos[grupoActual] || [];
         const idxGrupo = grupo.indexOf(ganadorTemporal);
         if (idxGrupo > -1) {
@@ -733,8 +728,6 @@ body > *:not(#videoFondo) {
 
       ganadores = [];
       renderListaGanadores();
-
-      // Restablecer los participantes del grupo actual
       grupos[grupoActual] = participantesRestantes;
 
       ganadorTemporal = null;
