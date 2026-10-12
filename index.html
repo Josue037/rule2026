@@ -14,6 +14,8 @@
       --green: #00ffc3;
       --text: #ffffff;
       --shadow: rgba(0, 0, 0, 0.55);
+      --logo-width: 140px;
+      --logo-gap: 24px;
     }
 
     * { box-sizing: border-box; }
@@ -61,27 +63,33 @@
       z-index: 2;
     }
 
-    /* Header that contains logo + title, centered like el contenedor */
+    /* Logo fixed to the very top-left corner (at the page edge) */
+    #logoUC {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--logo-width);
+      height: auto;
+      opacity: 1;
+      filter: drop-shadow(0 0 10px rgba(0,0,0,0.7));
+      z-index: 3; /* above content but below overlays that use larger z-index */
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    #logoUC:hover { opacity: 0.95; transform: translateY(-2px); }
+
+    /* Header container: title is shifted right so it doesn't overlap the fixed logo */
     #header {
       width: min(1400px, calc(100% - 30px));
       display: flex;
       align-items: center;
       gap: 18px;
       margin-top: 12px;
-      padding: 6px 0;
+      padding-left: calc(var(--logo-width) + var(--logo-gap)); /* leave space for logo */
+      /* keep header in normal flow (not fixed) so it scrolls with page */
     }
 
-    /* Logo is inline with the title now (no fixed positioning) */
-    #logoUC {
-      width: 140px;
-      height: auto;
-      opacity: 1;
-      filter: drop-shadow(0 0 10px rgba(0,0,0,0.7));
-      transition: opacity 0.18s ease, transform 0.18s ease;
-      flex: 0 0 auto;
-    }
-    #logoUC:hover { opacity: 0.95; transform: translateY(-2px); }
-
+    /* Title styling */
     h2 {
       margin: 0;
       text-align: left;
@@ -311,18 +319,31 @@
         max-width: 72vw;
       }
 
+      /* reduce logo size and reduce header left padding on smaller screens */
+      :root { --logo-width: 110px; --logo-gap: 16px; }
+
       #header {
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
+        padding-left: calc(var(--logo-width) + var(--logo-gap));
       }
 
-      #logoUC {
-        width: 110px;
-      }
+      /* if screen is very narrow, stack header items */
+      @media (max-width: 520px) {
+        #header {
+          padding-left: 0;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+          margin-top: 16px;
+        }
 
-      h2 {
-        text-align: center;
+        #logoUC {
+          position: relative;
+          top: 0;
+          left: 0;
+          width: 110px;
+        }
+
+        h2 { text-align: center; }
       }
     }
 
@@ -350,9 +371,11 @@
     <source src="https://nube.geotecnologias.co.cr/s/rnKAsWrQ2ieF2cq/download" type="video/mp4">
   </video>
 
-  <!-- Header: logo inline with title (logo no longer fixed/overlapping) -->
+  <!-- Logo fixed at the top-left page edge -->
+  <img id="logoUC" src="https://raw.githubusercontent.com/Josue037/rule2026/main/image26.png" alt="UC Logo" />
+
+  <!-- Header: title positioned with left padding so it starts to the right of the logo -->
   <div id="header">
-    <img id="logoUC" src="https://raw.githubusercontent.com/Josue037/rule2026/main/image26.png" alt="UC Logo" />
     <h2>Sorteo UC 2026 - Conferencia de usuarios Geotecnologías - ESRI</h2>
   </div>
 
