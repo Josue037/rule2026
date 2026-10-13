@@ -178,8 +178,9 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      flex: 1 1 680px;
+      flex: 1 1 720px;
       min-width: 320px;
+      position: relative;
     }
 
     /* The canvas scales with container; using vw ensures responsiveness */
@@ -191,7 +192,7 @@
       max-width: 100vw;
       width: 100%;
       height: auto;
-      border: 3px solid rgba(255,255,255,0.06);
+      border: 4px solid rgba(255,255,255,0.06);
     }
 
     /* Pointer stays proportional */
@@ -253,25 +254,25 @@
     #ganador { display: none; }
 
     #overlayGanador {
-      position: fixed;
+      position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%) scale(0);
-      font-size: clamp(1.8rem, 3vw, 3rem);
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
       font-weight: bold;
       color: var(--green);
       text-shadow: 0 0 18px rgba(0,255,195,0.9);
       background: rgba(0,0,0,0.9);
-      padding: 24px 32px;
+      padding: 18px 26px;
       border-radius: 14px;
-      z-index: 9999;
+      z-index: 20;
       text-align: center;
-      transition: transform 0.35s ease, opacity 0.35s ease;
+      transition: transform 0.28s ease, opacity 0.28s ease;
       opacity: 0;
       pointer-events: auto;
       box-shadow: 0 0 30px rgba(0,255,195,0.12);
       border: 1px solid rgba(0,255,195,0.12);
-      max-width: 90vw;
+      max-width: 90%;
     }
 
     #overlayGanador.visible {
@@ -319,13 +320,11 @@
 
     /* Responsive rules */
     @media (min-width: 1200px) {
-      /* give more breathing room on very wide screens */
       #contenedor { padding: 32px; }
-      canvas { max-width: 520px; }
+      canvas { max-width: 620px; }
     }
 
     @media (max-width: 950px) {
-      /* Stack the main columns vertically for medium/smaller screens */
       #contenedor {
         flex-direction: column;
         padding: 16px;
@@ -336,15 +335,11 @@
       #participantes { order: 1; }
       #ganadoresContainer { order: 3; }
 
-      /* Reduce max height to avoid too tall side panels */
       #participantes, #ganadoresContainer { max-height: 30vh; }
-
-      /* reduce title left padding so it still aligns nicely */
       #header { padding-left: calc(var(--logo-width) + 12px); }
     }
 
     @media (max-width: 520px) {
-      /* On very small screens make logo no longer fixed so header can stack naturally */
       :root { --logo-width: 96px; --logo-gap: 12px; }
 
       #logoUC {
@@ -366,13 +361,12 @@
       }
 
       h2 { font-size: 1.1rem; }
-
-      canvas { max-width: 92vw; }
+      canvas { max-width: 96vw; }
 
       button { width: 100%; min-width: 0; }
       #botones { gap: 8px; }
-
       #participantes, #ganadoresContainer { width: 100%; max-height: 28vh; }
+      #overlayGanador { font-size: 1.2rem; padding: 12px 16px; }
     }
 
   </style>
@@ -382,10 +376,8 @@
     <source src="https://nube.geotecnologias.co.cr/s/rnKAsWrQ2ieF2cq/download" type="video/mp4">
   </video>
 
-  <!-- Logo fixed at the top-left page edge (becomes relative on very small screens) -->
   <img id="logoUC" src="https://raw.githubusercontent.com/Josue037/rule2026/main/image26.png" alt="UC Logo" />
 
-  <!-- Header: title positioned with left padding so it starts to the right of the logo -->
   <div id="header">
     <h2>Sorteo UC 2026 - Conferencia de usuarios Geotecnologías - ESRI</h2>
   </div>
@@ -416,17 +408,17 @@
 
       <div id="estado">Cargando participantes...</div>
       <div id="ganador"></div>
+
+      <div id="overlayGanador">
+        <button id="cerrarOverlay" onclick="cerrarOverlay()">✖️</button>
+        <div id="textoGanador"></div>
+      </div>
     </div>
 
     <div id="ganadoresContainer">
       <h3>Ganadores</h3>
       <div id="listaGanadores"></div>
     </div>
-  </div>
-
-  <div id="overlayGanador">
-    <button id="cerrarOverlay" onclick="cerrarOverlay()">✖️</button>
-    <div id="textoGanador"></div>
   </div>
 
   <div class="logos">
@@ -459,9 +451,9 @@
     ];
 
     function ajustarCanvas() {
-      // Use the actual rendered width so the canvas stays crisp and responsive
       const rect = canvas.getBoundingClientRect();
-      const tam = Math.min(rect.width, window.innerWidth * 0.9);
+      const containerMax = Math.min(rect.width * 1.06, window.innerWidth * 0.94);
+      const tam = Math.min(rect.width, containerMax);
       canvas.width = tam;
       canvas.height = tam;
       dibujarRuleta();
